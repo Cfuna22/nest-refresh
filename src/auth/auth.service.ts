@@ -1,15 +1,15 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DATABASE } from 'src/db/db.provider';
+import type { DrizzleDB } from 'src/db/db.provider';
 import * as bcrypt from 'bcrypt';
 import { users } from 'src/db/schema';
 import { eq } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(DATABASE) private readonly db: NodePgDatabase,
+    @Inject(DATABASE) private readonly db: DrizzleDB,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -33,6 +33,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid credentials');
@@ -41,11 +42,12 @@ export class AuthService {
     return this.signToken(user);
   }
 
-  private signToken(user: { id: string; email: string }) {
-    const payload = { sub: user.id, email: user.email };
-
+  private signToken(user: { id: number; email: string }) {
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign({
+        sub: user.id,
+        email: user.email,
+      }),
     };
   }
 }

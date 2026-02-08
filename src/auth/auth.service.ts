@@ -4,11 +4,12 @@ import { DATABASE } from 'src/db/db.provider';
 import * as bcrypt from 'bcrypt';
 import { users } from 'src/db/schema';
 import { eq } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(DATABASE) private readonly db: any,
+    @Inject(DATABASE) private readonly db: NodePgDatabase,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -40,7 +41,7 @@ export class AuthService {
     return this.signToken(user);
   }
 
-  private signToken(user: any) {
+  private signToken(user: { id: string; email: string }) {
     const payload = { sub: user.id, email: user.email };
 
     return {

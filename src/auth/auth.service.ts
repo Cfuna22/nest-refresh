@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DATABASE } from 'src/db/db.provider';
 import type { DrizzleDB } from 'src/db/db.provider';
@@ -16,10 +21,21 @@ export class AuthService {
   async register(email: string, name: string, password: string) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const [userExists] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (userExists) {
+      throw new ConflictException('Email already exist');
+    }
+
     const [user] = await this.db
       .insert(users)
       .values({ email, name, password: hashedPassword })
       .returning();
+
+    const refresh_token = this.signAccessToken(user);
 
     return this.signToken(user);
   }
@@ -39,7 +55,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.signToken(user);
+    const { password: _, ...safeUser } = user;
+
+    return this.signToken(safeUser);
   }
 
   private signToken(user: { id: number; email: string }) {
@@ -49,5 +67,16 @@ export class AuthService {
         email: user.email,
       }),
     };
+  }
+
+  private signAccessToken(user: { email: string; id: string }) {
+    return this.jwtService.sign(
+      { sub: user.id, email: user.email },
+      { expiresIn: '15m' },
+    );
+  }
+
+  private signRefreshToken(user: { id: string }) {
+    return this.jwtService.sign({ sub: user.id }, { expiresIn: '7d' });
   }
 }

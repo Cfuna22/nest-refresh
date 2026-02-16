@@ -37,6 +37,10 @@ export class AuthService {
 
     const refresh_token = this.signAccessToken(user);
 
+    if (!refresh_token) {
+      throw new ConflictException('not today nigga');
+    }
+
     return this.signToken(user);
   }
 
@@ -52,7 +56,7 @@ export class AuthService {
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid password');
     }
 
     const { password: _, ...safeUser } = user;

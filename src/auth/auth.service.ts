@@ -44,7 +44,7 @@ export class AuthService {
     return this.signToken(user);
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: sring) {
     const [user] = await this.db
       .select()
       .from(users)

@@ -34,7 +34,6 @@ export class AuthService {
       .insert(users)
       .values({ email, name, password: hashedPassword })
       .returning();
-
     const refresh_token = this.signAccessToken(user);
 
     if (!refresh_token) {

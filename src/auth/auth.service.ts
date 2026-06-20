@@ -27,7 +27,7 @@ export class AuthService {
       .where(eq(users.email, email));
 
     if (userExists) {
-      throw new ConflictException('Email already exist');
+      throw new ConflictException('Email alrady exist');
     }
 
     const [user] = await this.db

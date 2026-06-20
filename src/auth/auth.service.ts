@@ -38,7 +38,7 @@ export class AuthService {
     const refresh_token = this.signAccessToken(user);
 
     if (!refresh_token) {
-      throw new ConflictException('not today niga');
+      throw new ConflictException('not today nigga');
     }
 
     return this.signToken(user);

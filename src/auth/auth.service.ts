@@ -35,7 +35,7 @@ export class AuthService {
       .values({ email, name, password: hashedPassword })
       .returning();
 
-    const refresh_token = this.signAccessToken(user);
+    const refresh_token = this.signAccessTken(user);
 
     if (!refresh_token) {
       throw new ConflictException('not today nigga');

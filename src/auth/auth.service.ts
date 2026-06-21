@@ -58,7 +58,24 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid password');
     }
-  ]
+
+    const { password: _, ...safeUser } = user;
+
+    return this.signToken(safeUser);
+  }
+
+  private signToken(user: { id: number; email: string }) {
+    return {
+      access_token: this.jwtService.sign({
+        sub: user.id,
+        email: user.email,
+      }),
+    };
+  }
+
+  private signAccessToken(user: { email: string; id: string }) {
+    return this.jwtService.sign(
+      { sub: user.id, email: user.email },
       { expiresIn: '15m' },
     );
   }

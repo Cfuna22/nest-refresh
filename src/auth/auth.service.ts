@@ -61,7 +61,7 @@ export class AuthService {
 
     const { password: _, ...safeUser } = user;
 
-    return this.signToken(safeUser);
+    return this.signToken(safeUser)
   }
 
   private signToken(user: { id: number; email: string }) {
